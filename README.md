@@ -204,7 +204,7 @@ const members = [
   { name:"Mohamd",  initials:"MO", avClass:"av-purple", role:"Technician" }
 ];
 
-// المهام الأساسية الموجودة في الكود (يمكنك زيادة أو تعديل القائمة هنا يدويًا متى شئت)
+// المهام الأساسية الموجودة في الكود (فاضية تماماً وتصفر العدادات بنجاح)
 const codeTasks = [];
 
 let tasks = [];
