@@ -205,8 +205,7 @@ const members = [
 ];
 
 // المهام الأساسية الموجودة في الكود (يمكنك زيادة أو تعديل القائمة هنا يدويًا متى شئت)
-const codeTasks = [
-];
+const codeTasks = [];
 
 let tasks = [];
 
