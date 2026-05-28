@@ -204,37 +204,20 @@ const members = [
   { name:"Mohamd",  initials:"MO", avClass:"av-purple", role:"Technician" }
 ];
 
-// المهام الأساسية الموجودة في الكود (فاضية تماماً وتصفر العدادات بنجاح)
-const codeTasks = [];
-
+// مصفوفة نظيفة خالية من المهام تماماً
 let tasks = [];
-
-// دالة ذكية لإدارة الذاكرة والدمج عند تحديث الصفحة
-function initTasksEngine() {
-  const localSaved = localStorage.getItem("aramco_tasks_db");
-  
-  if (!localSaved) {
-    // أول مرة يفتح الموقع، خذ كود التاسكات الافتراضي واحفظه
-    tasks = [...codeTasks];
-    saveToLocalStorage();
-  } else {
-    // إذا فيه تخزين سابق، نفك التشفير
-    const savedTasks = JSON.parse(localSaved);
-    
-    // ميزة الدمج الذكي: نبحث إذا المبرمج أضاف تاسكات جديدة في الكود (codeTasks) ما هي موجودة بالذاكرة
-    codeTasks.forEach(cTask => {
-      const exists = savedTasks.some(sTask => sTask.id === cTask.id);
-      if (!exists) {
-        savedTasks.push(cTask); // نضيف التاسك الجديد المكتوب بالكود
-      }
-    });
-    tasks = savedTasks;
-    saveToLocalStorage(); // حفظ دمج البيانات الجديد
-  }
-}
 
 function saveToLocalStorage() {
   localStorage.setItem("aramco_tasks_db", JSON.stringify(tasks));
+}
+
+function loadFromLocalStorage() {
+  const localSaved = localStorage.getItem("aramco_tasks_db");
+  if (localSaved) {
+    tasks = JSON.parse(localSaved);
+  } else {
+    tasks = [];
+  }
 }
 
 function showToast(msg) {
@@ -275,7 +258,6 @@ function addNewTask() {
     return;
   }
 
-  // حساب ID ديناميكي عشان ما يتصادم مع أي أرقام قديمة
   const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
 
   tasks.push({
@@ -287,13 +269,10 @@ function addNewTask() {
   });
 
   titleInput.value = "";
-
-  // حفظ في الذاكرة وإعادة رسم الواجهة
   saveToLocalStorage();
   updateStats();
   renderTeam();
   renderTasks();
-
   showToast(`تم إسناد مهمة جديدة بنجاح إلى ${owner}`);
 }
 
@@ -336,8 +315,6 @@ function doCloseTask(id) {
   const t = tasks.find(x => x.id === id);
   if (!t || t.status === "done") return;
   t.status = "done";
-  
-  // حفظ التعديل في الذاكرة
   saveToLocalStorage();
   updateStats(); renderTasks(); renderTeam();
   showToast("تم إغلاق التاسك: " + t.title);
@@ -441,8 +418,7 @@ function filterStatus(status, btn) {
   btn.classList.add("active"); renderTasks();
 }
 
-// تشغيل المحرك الذكي للمهام أولاً عند تحميل الصفحة
-initTasksEngine();
+loadFromLocalStorage();
 populateOwnersDropdown();
 updateAdminBar(); renderTeam(); renderTasks(); updateStats();
 </script>
