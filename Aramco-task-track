@@ -24,8 +24,7 @@
     .admin-btn { background: transparent; border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 4px 12px; font-size: 12px; font-family: 'Cairo', sans-serif; color: var(--text2); cursor: pointer; }
     .admin-btn:hover { background: var(--bg2); }
     
-    /* ستايل فورم إضافة تاسك جديد */
-    .add-task-panel { display: none; background: #eaf5f1; border: 1px dashed #0c614c; border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 2rem; }
+    .add-task-panel { display: none; background: #eaf5f1; border: 1px dashed #00664F; border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 2rem; }
     .add-task-panel.visible { display: block; }
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
     .form-row input, .form-row select { background: #fff; border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 8px 12px; font-family: 'Cairo', sans-serif; font-size: 13px; outline: none; color: var(--text); }
@@ -125,7 +124,8 @@
     <div class="section-title" style="margin-bottom: 5px; color:#00664F;"><i class="ti ti-plus"></i> إضافة مهمة جديدة للفريق</div>
     <div class="form-row">
       <input type="text" id="new-task-title" placeholder="اكتب وصف المهمة الجديدة هنا..."/>
-      <select id="new-task-owner"></select> <select id="new-task-type">
+      <select id="new-task-owner"></select>
+      <select id="new-task-type">
         <option value="PM">وقائية (PM)</option>
         <option value="CM">تصحيحية (CM)</option>
       </select>
@@ -134,7 +134,7 @@
   </div>
 
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-label">إجمالي المهام</div><div class="stat-val" style="color:#1a1a18" id="total-count">20</div></div>
+    <div class="stat-card"><div class="stat-label">إجمالي المهام</div><div class="stat-val" style="color:#1a1a18" id="total-count">0</div></div>
     <div class="stat-card"><div class="stat-label">مكتملة ✓</div><div class="stat-val" style="color:#0F6E56" id="done-count">0</div></div>
     <div class="stat-card"><div class="stat-label">PM مكتملة</div><div class="stat-val" style="color:#534AB7" id="pm-done">0</div></div>
     <div class="stat-card"><div class="stat-label">CM مكتملة</div><div class="stat-val" style="color:#BA7517" id="cm-done">0</div></div>
@@ -204,7 +204,8 @@ const members = [
   { name:"Mohamd",  initials:"MO", avClass:"av-purple", role:"Technician" }
 ];
 
-const tasks = [
+// المهام الأساسية الموجودة في الكود (يمكنك زيادة أو تعديل القائمة هنا يدويًا متى شئت)
+const codeTasks = [
   { id:1,  title:"Inspection Report Q1",    owner:"Yahya",   type:"PM", status:"pending"  },
   { id:2,  title:"Equipment Calibration",  owner:"Yahya",   type:"CM", status:"pending"  },
   { id:3,  title:"Safety Audit",            owner:"Yahya", type:"PM", status:"pending"  },
@@ -227,6 +228,36 @@ const tasks = [
   { id:20, title:"Risk Assessment",        owner:"Yahya",   type:"PM", status:"done"     }
 ];
 
+let tasks = [];
+
+// دالة ذكية لإدارة الذاكرة والدمج عند تحديث الصفحة
+function initTasksEngine() {
+  const localSaved = localStorage.getItem("aramco_tasks_db");
+  
+  if (!localSaved) {
+    // أول مرة يفتح الموقع، خذ كود التاسكات الافتراضي واحفظه
+    tasks = [...codeTasks];
+    saveToLocalStorage();
+  } else {
+    // إذا فيه تخزين سابق، نفك التشفير
+    const savedTasks = JSON.parse(localSaved);
+    
+    // ميزة الدمج الذكي: نبحث إذا المبرمج أضاف تاسكات جديدة في الكود (codeTasks) ما هي موجودة بالذاكرة
+    codeTasks.forEach(cTask => {
+      const exists = savedTasks.some(sTask => sTask.id === cTask.id);
+      if (!exists) {
+        savedTasks.push(cTask); // نضيف التاسك الجديد المكتوب بالكود
+      }
+    });
+    tasks = savedTasks;
+    saveToLocalStorage(); // حفظ دمج البيانات الجديد
+  }
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem("aramco_tasks_db", JSON.stringify(tasks));
+}
+
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg; t.classList.add("show");
@@ -240,19 +271,16 @@ function updateAdminBar() {
     ? '<i class="ti ti-lock-open"></i> تسجيل خروج'
     : '<i class="ti ti-lock"></i> دخول المدير';
     
-  // إظهار أو إخفاء لوحة إضافة المهام بناءً على الصلاحية
   const addPanel = document.getElementById("add-task-panel");
   if (isAdmin) { addPanel.classList.add("visible"); } 
   else { addPanel.classList.remove("visible"); }
 }
 
-// دالة تعبئة أسماء الموظفين في قائمة الإضافة المنسدلة
 function populateOwnersDropdown() {
   const select = document.getElementById("new-task-owner");
   select.innerHTML = members.map(m => `<option value="${m.name}">${m.name} (${m.role})</option>`).join("");
 }
 
-// دالة إضافة مهمة جديدة
 function addNewTask() {
   const titleInput = document.getElementById("new-task-title");
   const ownerSelect = document.getElementById("new-task-owner");
@@ -268,22 +296,21 @@ function addNewTask() {
     return;
   }
 
-  // حساب ID جديد فريد
+  // حساب ID ديناميكي عشان ما يتصادم مع أي أرقام قديمة
   const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
 
-  // إضافة الكائن الجديد للمصفوفة الافتراضية
   tasks.push({
     id: newId,
     title: title,
     owner: owner,
     type: type,
-    status: "pending" // أي مهمة جديدة تبدأ بوضع "معلقة" تلقائيًا
+    status: "pending"
   });
 
-  // تصفير حقل النص بعد النجاح
   titleInput.value = "";
 
-  // تحديث الشاشة بالبيانات الجديدة مباشرة
+  // حفظ في الذاكرة وإعادة رسم الواجهة
+  saveToLocalStorage();
   updateStats();
   renderTeam();
   renderTasks();
@@ -330,6 +357,9 @@ function doCloseTask(id) {
   const t = tasks.find(x => x.id === id);
   if (!t || t.status === "done") return;
   t.status = "done";
+  
+  // حفظ التعديل في الذاكرة
+  saveToLocalStorage();
   updateStats(); renderTasks(); renderTeam();
   showToast("تم إغلاق التاسك: " + t.title);
 }
@@ -432,7 +462,8 @@ function filterStatus(status, btn) {
   btn.classList.add("active"); renderTasks();
 }
 
-// الاستدعاءات الأساسية عند التحميل
+// تشغيل المحرك الذكي للمهام أولاً عند تحميل الصفحة
+initTasksEngine();
 populateOwnersDropdown();
 updateAdminBar(); renderTeam(); renderTasks(); updateStats();
 </script>
