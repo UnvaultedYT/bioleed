@@ -192,7 +192,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_PASS = "aramco2025";
+const ADMIN_PASS = "3232";
 let isAdmin = false, pendingTaskId = null;
 let currentType = "all", currentStatus = "all", currentSearch = "";
 
@@ -206,26 +206,7 @@ const members = [
 
 // المهام الأساسية الموجودة في الكود (يمكنك زيادة أو تعديل القائمة هنا يدويًا متى شئت)
 const codeTasks = [
-  { id:1,  title:"Inspection Report Q1",    owner:"Yahya",   type:"PM", status:"pending"  },
-  { id:2,  title:"Equipment Calibration",  owner:"Yahya",   type:"CM", status:"pending"  },
-  { id:3,  title:"Safety Audit",            owner:"Yahya", type:"PM", status:"pending"  },
-  { id:4,  title:"Pipe Maintenance",       owner:"Ali",     type:"CM", status:"progress" },
-  { id:5,  title:"Preventive Schedule",    owner:"Mohamd",  type:"PM", status:"pending"  },
-  { id:6,  title:"Valve Replacement",      owner:"Yahya",   type:"CM", status:"progress" },
-  { id:7,  title:"Pressure Testing",       owner:"Yahya",   type:"PM", status:"pending"  },
-  { id:8,  title:"Corrective Work Order",  owner:"Ali",     type:"CM", status:"pending"  },
-  { id:9,  title:"Asset Register Update",  owner:"Ali", type:"PM", status:"progress" },
-  { id:10, title:"Pump Overhaul",          owner:"Mohamd",  type:"CM", status:"pending"  },
-  { id:11, title:"Lubrication Schedule",   owner:"Yahya",   type:"PM", status:"pending"  },
-  { id:12, title:"Bearing Replacement",    owner:"Ali",   type:"CM", status:"pending"  },
-  { id:13, title:"CMMS Data Entry",        owner:"Abdulla", type:"PM", status:"pending"  },
-  { id:14, title:"Filter Cleaning",        owner:"Ali",     type:"CM", status:"progress" },
-  { id:15, title:"KPI Report",             owner:"Yahya",   type:"PM", status:"pending"  },
-  { id:16, title:"Emergency Repair",       owner:"Mohamd",  type:"CM", status:"pending"  },
-  { id:17, title:"Inventory Check",        owner:"Abdulla", type:"PM", status:"pending"  },
-  { id:18, title:"Vendor Coordination",    owner:"Abdulla", type:"PM", status:"progress" },
-  { id:19, title:"Compressor Maintenance", owner:"Ahmed",   type:"CM", status:"done"     },
-  { id:20, title:"Risk Assessment",        owner:"Yahya",   type:"PM", status:"done"     }
+
 ];
 
 let tasks = [];
